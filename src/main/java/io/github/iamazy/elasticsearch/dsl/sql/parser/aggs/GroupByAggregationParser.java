@@ -65,6 +65,7 @@ public class GroupByAggregationParser implements QueryParser {
 
     }
 
+    @SuppressWarnings("unchecked")
     private Object recursiveParseGroupByItemExpr(SQLExpr sqlExpr, String queryAs) {
         if (sqlExpr instanceof SQLBinaryOpExpr) {
             SQLBinaryOpExpr binOpExpr = (SQLBinaryOpExpr) sqlExpr;

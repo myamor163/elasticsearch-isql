@@ -114,7 +114,7 @@ public class RangeAggAggregationParser extends AbstractGroupByMethodAggregationP
                 ZonedDateTime toDate = getDateRangeVal(segment.getTo().toString());
 
                 String key = String.format("[%s]-[%s]", formatDateRangeAggKey(fromDate), formatDateRangeAggKey(toDate));
-                dateRangeBuilder.addRange(key, fromDate, toDate);
+                dateRangeBuilder.addRange(key, fromDate.toString(), toDate.toString());
             }
             rangeBuilder = dateRangeBuilder;
         }

@@ -46,7 +46,7 @@ public abstract class AbstractParameterizedMethodExpression implements Parameter
     public Map<String, Object> generateRawTypeParameterMap(MethodInvocation invocation) {
         Map<String, String> extraParamMap = generateParameterMap(invocation);
         if (MapUtils.isNotEmpty(extraParamMap)) {
-            return Maps.transformEntries(extraParamMap, (key, value) -> NumberUtils.isNumber(value) ? NumberUtils.createNumber(value) : value);
+            return Maps.transformEntries(extraParamMap, (key, value) -> NumberUtils.isDigits(value) ? NumberUtils.createNumber(value) : value);
         }
 
         return Collections.emptyMap();

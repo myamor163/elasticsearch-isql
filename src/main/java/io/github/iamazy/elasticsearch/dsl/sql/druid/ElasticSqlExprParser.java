@@ -33,12 +33,7 @@ public class ElasticSqlExprParser extends SQLExprParser {
             } else {
                 return expr;
             }
-        }
-        else if(this.lexer.token()==Token.CARET){
-            this.lexer.nextToken();
-            return new SQLIdentifierExpr("^"+expr());
-        }
-        else {
+        } else {
             SQLExpr expr = this.primary();
             Token token = this.lexer.token();
             if (token == Token.COMMA) {

@@ -8,8 +8,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsRequest;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
@@ -28,7 +26,6 @@ import org.elasticsearch.search.sort.SortBuilder;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 /**
@@ -46,7 +43,7 @@ public class ElasticSqlParseResult {
     private String scrollId;
 
     private List<String> indices;
-    private String type = "_doc";
+//    private String type = "_doc";
     private String queryAs;
     /**
      * 需要高亮显示的字段
@@ -60,15 +57,12 @@ public class ElasticSqlParseResult {
     private transient List<AggregationBuilder> groupBy;
     private transient SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-    private GetMappingsRequest mappingsRequest;
-    private GetFieldMappingsRequest fieldMappingsRequest;
-
     public DeleteByQueryRequest toDelRequest() {
         DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(toRequest().indices());
         deleteByQueryRequest.setQuery(searchSourceBuilder.query());
-        if (StringUtils.isNotBlank(type)) {
-            deleteByQueryRequest.types(type);
-        }
+//        if (StringUtils.isNotBlank(type)) {
+//            deleteByQueryRequest.types(type);
+//        }
         if (CollectionUtils.isNotEmpty(routingBy)) {
             deleteByQueryRequest.setRouting(routingBy.get(0));
         }
@@ -79,14 +73,6 @@ public class ElasticSqlParseResult {
             deleteByQueryRequest.setSize(size);
         }
         return deleteByQueryRequest;
-    }
-
-    public GetFieldMappingsRequest toFieldMapping(){
-        return fieldMappingsRequest;
-    }
-
-    public GetMappingsRequest toMapping(){
-        return mappingsRequest;
     }
 
     public SearchResponse toResponse(RestHighLevelClient restHighLevelClient, RequestOptions requestOptions) throws IOException {
@@ -104,13 +90,12 @@ public class ElasticSqlParseResult {
 
     public SearchRequest toRequest() {
         SearchRequest searchRequest = new SearchRequest();
-        List<String> indexList=indices.parallelStream().map(index->index.replace("`","")).collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(indexList)) {
-            searchRequest.indices(indexList.toArray(new String[0]));
+        if (CollectionUtils.isNotEmpty(indices)) {
+            searchRequest.indices(indices.toArray(new String[0]));
         }
-        if (StringUtils.isNotBlank(type)) {
-            searchRequest.types(type);
-        }
+//        if (StringUtils.isNotBlank(type)) {
+//            searchRequest.types(type);
+//        }
 
 
         if (from < 0) {
@@ -126,7 +111,6 @@ public class ElasticSqlParseResult {
         } else {
             searchSourceBuilder.size(size);
         }
-
 
         if(CollectionUtils.isNotEmpty(highlighter)) {
             HighlightBuilder highlightBuilder = HighlightBuilders.highlighter(highlighter);
@@ -155,20 +139,7 @@ public class ElasticSqlParseResult {
         }
 
         if (CollectionUtils.isNotEmpty(queryFieldList)) {
-            List<String> includes=new ArrayList<>(0);
-            List<String> excludes=new ArrayList<>(0);
-            for(String field:queryFieldList) {
-                if(field.startsWith(CoreConstants.UP_ARROW)){
-                    excludes.add(field.substring(1));
-                }
-                else if(field.startsWith("`^")){
-                    excludes.add(field.replaceAll(CoreConstants.GRAVE_ACCENT,StringUtils.EMPTY).substring(1));
-                }
-                else{
-                    includes.add(field.replaceAll(CoreConstants.GRAVE_ACCENT,StringUtils.EMPTY));
-                }
-            }
-            searchSourceBuilder.fetchSource(includes.toArray(new String[0]), excludes.toArray(new String[0]));
+            searchSourceBuilder.fetchSource(queryFieldList.toArray(new String[0]), null);
         }
 
         if (CollectionUtils.isNotEmpty(routingBy)) {
@@ -185,7 +156,6 @@ public class ElasticSqlParseResult {
             final Scroll scroll = new Scroll(TimeValue.parseTimeValue(scrollExpire, StringUtils.EMPTY));
             searchRequest.scroll(scroll);
         }
-
         return searchRequest.source(searchSourceBuilder);
     }
 
@@ -206,7 +176,7 @@ public class ElasticSqlParseResult {
     public String toString() {
         String ptn = "index:%s,type:%s,query_as:%s,from:%s,size:%s,routing:%s,dsl:%s";
         return String.format(
-                ptn, indices, type, queryAs, from, size,
+                ptn, indices,/* type,*/ queryAs, from, size,
                 (routingBy != null ? routingBy.toString() : "[]"), toDsl(toRequest())
         );
     }

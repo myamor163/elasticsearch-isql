@@ -2,9 +2,8 @@ package io.github.iamazy.elasticsearch.dsl.sql;
 
 import io.github.iamazy.elasticsearch.dsl.sql.model.ElasticSqlParseResult;
 import io.github.iamazy.elasticsearch.dsl.sql.parser.ElasticSql2DslParser;
+import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 /**
  * @author iamazy
@@ -31,7 +30,7 @@ public class SqlParserSelectFieldTest {
 
     @Test
     public void testHasChild(){
-        String sql="select `name*`,^age from fruit where has_child('apple',price in (10,20,30),1,4)";
+        String sql="select * from device_search where has_child('imageInfo',portInfo.port in (10,20,30),1,4)";
         ElasticSql2DslParser sql2DslParser=new ElasticSql2DslParser();
         ElasticSqlParseResult parseResult = sql2DslParser.parse(sql);
         System.out.println(parseResult.toPrettyDsl(parseResult.toRequest()));
@@ -60,7 +59,7 @@ public class SqlParserSelectFieldTest {
 
     @Test
     public void testHighlighter2(){
-        String sql="select * from fruit where match_phrase(name,'苹果') or match_phrase(h#$aaa$bbb.mac,'0x10192j')  order by lastModified desc limit 0,10";
+        String sql="select * from device_info where match_phrase(deviceLocation.zhProvince,'首尔') or match_phrase(h#$aaa$ipInfo.mac,'0x10192j')  order by lastModified desc limit 0,10";
         ElasticSql2DslParser sql2DslParser=new ElasticSql2DslParser();
         ElasticSqlParseResult parseResult = sql2DslParser.parse(sql);
         System.out.println(parseResult.toPrettyDsl(parseResult.toRequest()));
@@ -68,7 +67,8 @@ public class SqlParserSelectFieldTest {
 
     @Test
     public void test2(){
-        String sql="select * from fruit where query_string('h#苹果','fields:weight*,name','analyzer:ik_smart,phrase_slop:1')";
+        String sql="select * from fruit where query_string('h#苹果','fields:deviceInfo.device*,deviceLocation.address','analyzer:ik_smart,phrase_slop:1')";
+        sql=String.format(sql,"device_search");
         ElasticSql2DslParser sql2DslParser=new ElasticSql2DslParser();
         ElasticSqlParseResult parseResult = sql2DslParser.parse(sql);
         System.out.println(parseResult.toPrettyDsl(parseResult.toRequest()));
@@ -76,12 +76,10 @@ public class SqlParserSelectFieldTest {
 
     @Test
     public void test3(){
-        String sql="select * from `apple-aaa-01-.*` order by minPrice desc, advicePrice asc";
+        String sql="select * from aa";
         ElasticSql2DslParser sql2DslParser=new ElasticSql2DslParser();
         ElasticSqlParseResult parseResult = sql2DslParser.parse(sql);
         System.out.println(parseResult.toPrettyDsl(parseResult.toRequest()));
-        System.out.println(Arrays.toString(parseResult.toRequest().indices()));
     }
-
 
 }

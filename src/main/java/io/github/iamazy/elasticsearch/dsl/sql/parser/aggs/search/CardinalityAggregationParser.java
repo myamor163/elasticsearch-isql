@@ -13,7 +13,7 @@ import io.github.iamazy.elasticsearch.dsl.sql.parser.aggs.AbstractGroupByMethodA
 import io.github.iamazy.elasticsearch.dsl.sql.parser.sql.QueryFieldParser;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.metrics.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
 
 import java.util.List;
 
@@ -55,6 +55,7 @@ public class CardinalityAggregationParser extends AbstractGroupByMethodAggregati
     private AggregationBuilder parseCardinalityAggregation(String queryAs, SQLExpr cardinalityFieldExpr, SQLExpr precisionThreshold) {
         QueryFieldParser queryFieldParser = new QueryFieldParser();
         ElasticSqlQueryField queryField = queryFieldParser.parseConditionQueryField(cardinalityFieldExpr, queryAs);
+
         if (queryField.getQueryFieldType() == QueryFieldType.RootDocField || queryField.getQueryFieldType() == QueryFieldType.InnerDocField) {
             if (precisionThreshold != null) {
                 Number threshold = (Number) ElasticSqlArgConverter.convertSqlArg(precisionThreshold);

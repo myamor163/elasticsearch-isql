@@ -16,7 +16,5 @@ public enum SqlConditionOperator {
     IsNotNull,
     In,
     NotIn,
-    BetweenAnd,
-    Like,
-    NotLike
+    BetweenAnd
 }

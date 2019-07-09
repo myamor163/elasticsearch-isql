@@ -13,15 +13,11 @@ import io.github.iamazy.elasticsearch.dsl.sql.druid.ElasticSqlExprParser;
 import io.github.iamazy.elasticsearch.dsl.sql.druid.ElasticSqlSelectQueryBlock;
 import io.github.iamazy.elasticsearch.dsl.sql.exception.ElasticSql2DslException;
 import io.github.iamazy.elasticsearch.dsl.sql.parser.aggs.GroupByAggregationParser;
-import io.github.iamazy.elasticsearch.dsl.sql.parser.query.method.mapping.MappingQueryParser;
 import io.github.iamazy.elasticsearch.dsl.sql.parser.sql.*;
 import io.github.iamazy.elasticsearch.dsl.sql.model.ElasticDslContext;
 import io.github.iamazy.elasticsearch.dsl.sql.model.ElasticSqlParseResult;
-import org.elasticsearch.action.admin.indices.mapping.get.GetFieldMappingsRequest;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest;
 
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -46,22 +42,6 @@ public class ElasticSql2DslParser {
                     elasticDslContext.getParseResult().setSize(((SQLIntegerExpr) sqlLimit.getRowCount()).getNumber().intValue());
                     return elasticDslContext.getParseResult();
                 }
-                case DESC:{
-                    Object mappingsRequest = MappingQueryParser.parse(sql);
-                    ElasticDslContext elasticDslContext=new ElasticDslContext(null);
-                    if(mappingsRequest instanceof GetMappingsRequest) {
-                        GetMappingsRequest getMappingsRequest=(GetMappingsRequest) mappingsRequest;
-                        elasticDslContext.getParseResult().setMappingsRequest(getMappingsRequest);
-                        elasticDslContext.getParseResult().setIndices(Arrays.asList(getMappingsRequest.indices()));
-                    }else if(mappingsRequest instanceof GetFieldMappingsRequest) {
-                        GetFieldMappingsRequest getFieldMappingsRequest=(GetFieldMappingsRequest) mappingsRequest;
-                        elasticDslContext.getParseResult().setFieldMappingsRequest((GetFieldMappingsRequest) mappingsRequest);
-                        elasticDslContext.getParseResult().setIndices(Arrays.asList(getFieldMappingsRequest.indices()));
-                    }else{
-                        throw new ElasticSql2DslException("[syntax error] not support desc like this syntax");
-                    }
-                    return elasticDslContext.getParseResult();
-                }
                 case SELECT:
                 default: {
                     ElasticSqlExprParser elasticSqlExprParser = new ElasticSqlExprParser(sql);
@@ -74,7 +54,7 @@ public class ElasticSql2DslParser {
                             sqlParser.parse(elasticDslContext);
                         }
                     } else {
-                        throw new ElasticSql2DslException("[syntax error] Sql only support Select,Delete,Desc Sql");
+                        throw new ElasticSql2DslException("[syntax error] Sql only support Select,Delete Sql");
                     }
                     return elasticDslContext.getParseResult();
                 }
